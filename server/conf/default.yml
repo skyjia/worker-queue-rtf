@@ -1,0 +1,37 @@
+---
+################ NLB NODE ################
+
+# The current application instance name.
+name: "worker_queue"
+
+
+################ DEBUG ###################
+
+# Set `true` to enable debug mode.
+debug_mode: false
+
+################ HTTP ####################
+
+http:
+  # set `null` to use PORT environment value. Use 3000 as default if no PORT environment is set.
+  # or set to an integer port like 8080
+  port: null
+
+################ Kue ####################
+
+# job prefix in redis.
+job_prefix: "q"
+
+# Set `ture` to enable node cluster mode.
+cluster_mode: false
+
+# Set number of CPU cores to be used for cluster.
+# If the set number exceeds the max number of system has, it will use the max number instead.
+cluster_worker_size: 2
+
+################ Redis ####################
+redis_conn:
+  port: 6379
+  host: "127.0.0.1"
+  # see https://github.com/mranney/node_redis#rediscreateclientport-host-options
+  options: null

@@ -1,0 +1,11 @@
+---
+# Configurations for development environment.
+# Refer to default.yml for more information.
+
+name: "worker_queue"
+debug_mode: true
+
+job_prefix: "q"
+
+cluster_mode: true
+cluster_worker_size: 2
