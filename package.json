@@ -9,9 +9,10 @@
   "author": "Sky Jia <me@skyjia.com> (http://www.skyjia.com/)",
   "license": "ISC",
   "dependencies": {
+    "configuration-loader": "CDIChina/configuration-loader",
     "kue": "^0.8.9",
     "optimist": "^0.6.1",
-    "configuration-loader": "CDIChina/configuration-loader"
+    "winston": "^0.8.3"
   },
   "devDependencies": {
     "chai": "^1.9.2",

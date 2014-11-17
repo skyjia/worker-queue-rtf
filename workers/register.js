@@ -1,6 +1,10 @@
+var app = require('../server/default.js');
+var logger = app.logger;
+
 var registerWorkers = function (currentQueue) {
 
-    console.log("Registering workers...");
+    logger.info("Registering workers...");
+    logger.warn("no registers");
 
 
     // Register sample worker

@@ -29,6 +29,42 @@ if (argv.config) {
 var config_loader = require('configuration-loader').createLoader(configFiles);
 var cfg = config_loader.reload();
 
+// Init logger
+var winston = require('winston');
+winston.cli();
+
+var logger = new (winston.Logger)({
+    transports: [
+        // Console logger
+        new (winston.transports.Console)({
+            colorize: true,
+            timestamp: true
+        }),
+
+        // File logger
+        new winston.transports.File({
+            filename: cfg.logger.run_log_file.path,
+            maxsize: cfg.logger.run_log_file.maxsize,
+            maxFiles: cfg.logger.run_log_file.maxFiles
+        })
+    ],
+    exceptionHandlers: [
+        new winston.transports.File({
+            filename: cfg.logger.exception_log_file.path,
+            maxsize: cfg.logger.exception_log_file.maxsize,
+            maxFiles: cfg.logger.exception_log_file.maxFiles
+        })
+    ]
+});
+
+
+// Export application
+var app = {
+    cfg: cfg,
+    logger: logger
+};
+
+module.exports = app;
 
 // Init Queue options
 var kue = require('kue');
@@ -51,15 +87,15 @@ if (cfg.cluster_mode) {
     var workerSize = cfg.cluster_worker_size > maxClusterWorkerSize ? maxClusterWorkerSize : cfg.cluster_worker_size;
 
     if (cluster.isMaster) {
-        console.log("Kue is connectint to", redis_options.host + ":" + redis_options.port);
-        console.log("Queue prefix:", cfg.job_prefix);
+        logger.info("Kue is connectint to", redis_options.host + ":" + redis_options.port);
+        logger.info("Queue prefix:", cfg.job_prefix);
 
-        console.log("Kue is working in cluster mode.");
-        console.log("Cluster size is ", workerSize);
+        logger.info("Kue is working in cluster mode.");
+        logger.info("Cluster size is ", workerSize);
 
         // Start RESTful API listerning
         kue.app.listen(port);
-        console.log("Kue RESTful API is listening on port", port);
+        logger.info("Kue RESTful API is listening on port", port);
 
         for (var i = 0; i < workerSize; i++) {
             cluster.fork();
@@ -73,14 +109,14 @@ if (cfg.cluster_mode) {
 } else {
     // Working in single process mode.
 
-    console.log("Kue is connectint to", redis_options.host + ":" + redis_options.port);
-    console.log("Queue prefix:", cfg.job_prefix);
+    logger.info("Kue is connectint to", redis_options.host + ":" + redis_options.port);
+    logger.info("Queue prefix:", cfg.job_prefix);
 
-    console.log("Kue is working in single process mode.");
+    logger.info("Kue is working in single process mode.");
 
     // Start RESTful API listerning
     kue.app.listen(port);
-    console.log("Kue RESTful API is listening on port", port);
+    logger.info("Kue RESTful API is listening on port", port);
 
     // Register workers
     var registerWorkers = require('../workers/register.js');

@@ -1,5 +1,6 @@
 # Ignore WebStorm generated files
 .idea/
+log/
 
 node_modules/
 npm-debug.log

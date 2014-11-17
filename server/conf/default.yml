@@ -4,6 +4,26 @@
 # The current application instance name.
 name: "worker_queue"
 
+################ LOGGER ################
+logger:
+  console_logger:
+    enabled: true # always true
+  run_log_file:
+    enabled: true # always true
+    path: "log/run.log"
+    # Default maxsize = 10MB.
+    # Max size in bytes of the logfile, if the size is exceeded then a new file is created.
+    maxsize: 10485760
+    # Limit the number of files created when the size of the logfile is exceeded.
+    maxFiles: 10
+  exception_log_file:
+    enabled: true # always true
+    path: "log/exceptions.log"
+    # Default maxsize = 10MB.
+    # Max size in bytes of the logfile, if the size is exceeded then a new file is created.
+    maxsize: 10485760
+    # Limit the number of files created when the size of the logfile is exceeded.
+    maxFiles: 10
 
 ################ DEBUG ###################
 
@@ -17,7 +37,7 @@ http:
   # or set to an integer port like 8080
   port: null
 
-################ Kue ####################
+################ QUEUE ####################
 
 # job prefix in redis.
 job_prefix: "q"
