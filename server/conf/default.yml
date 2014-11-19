@@ -55,3 +55,16 @@ redis_conn:
   host: "127.0.0.1"
   # see https://github.com/mranney/node_redis#rediscreateclientport-host-options
   options: null
+
+
+################ Workers ####################
+
+workers:
+
+# ----------- PDF2SWF -----------
+  pdf2swf:
+    worker_type: pdf2swf
+    concurrency_number: 1
+    script_path: ./tools/pdf2swf.sh
+    win_script_path: ./tools/windows/pdf2swf.bat
+    data_path: ./data

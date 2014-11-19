@@ -7,5 +7,13 @@ debug_mode: true
 
 job_prefix: "q"
 
-cluster_mode: true
+cluster_mode: false
 cluster_worker_size: 2
+
+workers:
+  pdf2swf:
+    worker_type: pdf2swf
+    concurrency_number: 1
+    script_path: ./tools/pdf2swf.sh
+    win_script_path: ./tools/windows/pdf2swf.bat
+    data_path: ./data

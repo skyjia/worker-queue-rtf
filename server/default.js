@@ -102,8 +102,8 @@ if (cfg.cluster_mode) {
         }
     } else if (cluster.isWorker) {
         // Register workers
-        var registerWorkers = require('../workers/register.js');
-        registerWorkers(jobs);
+        var registerWorkers = require('./register_workers.js');
+        registerWorkers(app, jobs);
     }
 
 } else {
@@ -119,6 +119,6 @@ if (cfg.cluster_mode) {
     logger.info("Kue RESTful API is listening on port", port);
 
     // Register workers
-    var registerWorkers = require('../workers/register.js');
-    registerWorkers(jobs);
+    var registerWorkers = require('./register_workers.js');
+    registerWorkers(app, jobs);
 }
