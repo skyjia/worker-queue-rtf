@@ -9,10 +9,12 @@
   "author": "Sky Jia <me@skyjia.com> (http://www.skyjia.com/)",
   "license": "ISC",
   "dependencies": {
-    "configuration-loader": "CDIChina/configuration-loader",
-    "kue": "^0.8.9",
+    "configuration-loader": "skyjia/configuration-loader",
+    "fs-extra": "^0.12.0",
+    "kue": "skyjia/kue",
+    "node-rest-client": "^1.4.1",
     "optimist": "^0.6.1",
-    "mkdirp": "^0.5.0",
+    "rimraf": "^2.2.8",
     "winston": "^0.8.3"
   },
   "devDependencies": {

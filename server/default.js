@@ -58,14 +58,6 @@ var logger = new (winston.Logger)({
 });
 
 
-// Export application
-var app = {
-    cfg: cfg,
-    logger: logger
-};
-
-module.exports = app;
-
 // Init Queue options
 var kue = require('kue');
 var DEFAULT_HTTP_PORT = 3000;
@@ -73,11 +65,19 @@ var port = cfg.http.port || process.env.PORT || DEFAULT_HTTP_PORT;
 var redis_options = cfg.redis_conn;
 
 // Create Queue
-var jobs = kue.createQueue({
+var queue = kue.createQueue({
     prefix: cfg.job_prefix,
     redis: redis_options
 });
 
+// Export application
+var app = {
+    cfg: cfg,
+    logger: logger,
+    queue: queue
+};
+
+module.exports = app;
 
 if (cfg.cluster_mode) {
     // Working in cluster mode
@@ -93,17 +93,21 @@ if (cfg.cluster_mode) {
         logger.info("Kue is working in cluster mode.");
         logger.info("Cluster size is ", workerSize);
 
+        for (var i = 0; i < workerSize; i++) {
+            cluster.fork();
+        }
+
+        queue.promote();
+
         // Start RESTful API listerning
         kue.app.listen(port);
         logger.info("Kue RESTful API is listening on port", port);
 
-        for (var i = 0; i < workerSize; i++) {
-            cluster.fork();
-        }
+
     } else if (cluster.isWorker) {
         // Register workers
         var registerWorkers = require('./register_workers.js');
-        registerWorkers(app, jobs);
+        registerWorkers(app, queue);
     }
 
 } else {
@@ -120,5 +124,9 @@ if (cfg.cluster_mode) {
 
     // Register workers
     var registerWorkers = require('./register_workers.js');
-    registerWorkers(app, jobs);
+    registerWorkers(app, queue);
+
+    queue.promote();
 }
+
+

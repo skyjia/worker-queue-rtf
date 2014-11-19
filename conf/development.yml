@@ -17,3 +17,4 @@ workers:
     script_path: ./tools/pdf2swf.sh
     win_script_path: ./tools/windows/pdf2swf.bat
     data_path: ./data
+    callback: http://localhost:9001/job_queue/callback/generate_fp_files/
