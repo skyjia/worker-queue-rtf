@@ -87,105 +87,97 @@ function postJobCallback(url, ctxData) {
     });
 }
 
-function bindQueueEvents(queue, worker, logger) {
-    // Bind enqueue event
-    queue.on('job enqueue', function (id, type) {
-        if (type === worker.worker_type) {
+function buildEvents(worker) {
+
+    return {
+        "job_enqueue_handler" : function (id, type) {
+            if (type === worker.worker_type) {
+
+                kue.Job.get(id, function (err, job) {
+                    if (err) return;
+
+                    var ctxData = {
+                        id: job.id,
+                        type: job.type,
+                        status: 'enqueue',
+                        updated_at: job.updated_at,
+                        data: job.data,
+                        result: null
+                    };
+
+                    postJobCallback(worker.settings.callback, ctxData);
+                });
+
+            }
+        },
+
+        "job_promotion_handler": function (id) {
+            // the job is promoted from delayed state to queued
 
             kue.Job.get(id, function (err, job) {
                 if (err) return;
 
-                var ctxData = {
-                    id: job.id,
-                    type: job.type,
-                    status: 'enqueue',
-                    updated_at: job.updated_at,
-                    data: job.data,
-                    result: null
-                };
+                if (job.type === worker.worker_type) {
+                    var ctxData = {
+                        id: job.id,
+                        type: job.type,
+                        status: 'promotion',
+                        updated_at: job.updated_at,
+                        data: job.data,
+                        result: null
+                    };
 
-                logger.info("Job [%d] enqueue.", job.id, ctxData);
+                    postJobCallback(worker.settings.callback, ctxData);
+                }
 
-                postJobCallback(worker.settings.callback, ctxData);
+            });
+        },
+
+        "job_failed_handler": function (id) {
+            // the job has failed and has no remaining attempts
+
+            kue.Job.get(id, function (err, job) {
+                if (err) return;
+
+                if (job.type === worker.worker_type) {
+                    var ctxData = {
+                        id: job.id,
+                        type: job.type,
+                        status: 'failed',
+                        updated_at: job.updated_at,
+                        data: job.data,
+                        failed_at: job.failed_at,
+                        result: null
+                    };
+
+                    postJobCallback(worker.settings.callback, ctxData);
+                }
+
+            });
+        },
+
+        "job_complete_handler": function (id, result) {
+            // the job has completed
+
+            kue.Job.get(id, function (err, job) {
+                if (err) return;
+
+                if (job.type === worker.worker_type) {
+                    var ctxData = {
+                        id: job.id,
+                        type: job.type,
+                        status: 'complete',
+                        updated_at: job.updated_at,
+                        data: job.data,
+                        result: result
+                    };
+
+                    postJobCallback(worker.settings.callback, ctxData);
+                }
             });
 
         }
-    });
-
-
-    queue.on('job promotion', function (id) {
-        // the job is promoted from delayed state to queued
-
-        kue.Job.get(id, function (err, job) {
-            if (err) return;
-
-            if (job.type === worker.worker_type) {
-                var ctxData = {
-                    id: job.id,
-                    type: job.type,
-                    status: 'promotion',
-                    updated_at: job.updated_at,
-                    data: job.data,
-                    result: null
-                };
-
-                logger.error("Job [%d] promotion", job.id, ctxData);
-
-                postJobCallback(worker.settings.callback, ctxData);
-            }
-
-        });
-    });
-    // Bind failed event
-    queue.on('job failed', function (id) {
-        // the job has failed and has no remaining attempts
-
-        kue.Job.get(id, function (err, job) {
-            if (err) return;
-
-            if (job.type === worker.worker_type) {
-                var ctxData = {
-                    id: job.id,
-                    type: job.type,
-                    status: 'failed',
-                    updated_at: job.updated_at,
-                    data: job.data,
-                    failed_at: job.failed_at,
-                    result: null
-                };
-
-                logger.error("Job [%d] failed", job.id, ctxData);
-
-                postJobCallback(worker.settings.callback, ctxData);
-            }
-
-        });
-    });
-
-    // Bind complete event
-    queue.on('job complete', function (id, result) {
-        // the job has completed
-
-        kue.Job.get(id, function (err, job) {
-            if (err) return;
-
-            if (job.type === worker.worker_type) {
-                var ctxData = {
-                    id: job.id,
-                    type: job.type,
-                    status: 'complete',
-                    updated_at: job.updated_at,
-                    data: job.data,
-                    result: result
-                };
-
-                logger.info("Job [%d] completed.", job.id, ctxData);
-
-                postJobCallback(worker.settings.callback, ctxData);
-            }
-        });
-
-    });
+    };
 }
 
 var initiliazer = function (app) {
@@ -203,10 +195,8 @@ var initiliazer = function (app) {
 
     var that = this;
     var logger = app.logger;
-    var queue = app.queue;
 
-    bindQueueEvents(queue, that, logger);
-
+    this.events = buildEvents(this);
     this.handler = function (job, done, ctx) {
 
         var processHandler = function(job, done, ctx){

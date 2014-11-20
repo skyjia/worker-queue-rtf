@@ -71,8 +71,7 @@ var queue = kue.createQueue({
 });
 
 // Graceful shutdown
-process.once('SIGINT', function (sig) {
-    console.log(sig);
+process.once('SIGINT', function () {
     queue.shutdown(function (err) {
         logger.info('Kue is shutting down.', err || null);
         process.exit(0);
@@ -115,6 +114,7 @@ if (cfg.cluster_mode) {
 
 
     } else if (cluster.isWorker) {
+
         // Register workers
         var registerWorkers = require('./register_workers.js');
         registerWorkers(app, queue);
