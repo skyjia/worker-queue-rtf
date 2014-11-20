@@ -29,33 +29,56 @@ if (argv.config) {
 var config_loader = require('configuration-loader').createLoader(configFiles);
 var cfg = config_loader.reload();
 
+var isWin = /^win/.test(process.platform);
+
 // Init logger
 var winston = require('winston');
 winston.cli();
 
-var logger = new (winston.Logger)({
-    transports: [
-        // Console logger
-        new (winston.transports.Console)({
-            colorize: true,
-            timestamp: true
-        }),
+var winstonOptions;
+if(isWin){
+    winstonOptions = {
+        transports: [
+            // Console logger
+            new (winston.transports.Console)({
+                colorize: true,
+                timestamp: true
+            })
+        ],
+        exceptionHandlers: [
+            new (winston.transports.Console)({
+                colorize: true,
+                timestamp: true
+            })
+        ]
+    }
+} else {
+    winstonOptions = {
+        transports: [
+            // Console logger
+            new (winston.transports.Console)({
+                colorize: true,
+                timestamp: true
+            }),
 
-        // File logger
-        new winston.transports.File({
-            filename: cfg.logger.run_log_file.path,
-            maxsize: cfg.logger.run_log_file.maxsize,
-            maxFiles: cfg.logger.run_log_file.maxFiles
-        })
-    ],
-    exceptionHandlers: [
+            // File logger
+            new winston.transports.File({
+                filename: cfg.logger.run_log_file.path,
+                maxsize: cfg.logger.run_log_file.maxsize,
+                maxFiles: cfg.logger.run_log_file.maxFiles
+            })
+        ],
+            exceptionHandlers: [
         new winston.transports.File({
             filename: cfg.logger.exception_log_file.path,
             maxsize: cfg.logger.exception_log_file.maxsize,
             maxFiles: cfg.logger.exception_log_file.maxFiles
         })
     ]
-});
+    };
+}
+
+var logger = new (winston.Logger)(winstonOptions);
 
 
 // Init Queue options
