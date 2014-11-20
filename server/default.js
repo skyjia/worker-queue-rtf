@@ -66,6 +66,7 @@ var redis_options = cfg.redis_conn;
 
 // Create Queue
 var queue = kue.createQueue({
+    disableSearch: true,
     prefix: cfg.job_prefix,
     redis: redis_options
 });
