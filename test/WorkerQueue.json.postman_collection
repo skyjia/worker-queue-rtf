@@ -1,0 +1,32 @@
+{
+	"id": "b8fbceae-c581-d681-44f2-7981e41ac5ba",
+	"name": "WorkerQueue",
+	"description": "",
+	"order": [
+		"0adc423b-7862-dd99-8789-97b2fe3c2307"
+	],
+	"folders": [],
+	"timestamp": 1416372603324,
+	"synced": false,
+	"requests": [
+		{
+			"id": "0adc423b-7862-dd99-8789-97b2fe3c2307",
+			"headers": "Content-Type: application/json\n",
+			"url": "localhost:3000/job",
+			"preRequestScript": "",
+			"pathVariables": {},
+			"method": "POST",
+			"data": [],
+			"dataMode": "raw",
+			"version": 2,
+			"tests": "",
+			"time": 1416424512062,
+			"name": "Job - pdf2swf",
+			"description": "",
+			"collectionId": "b8fbceae-c581-d681-44f2-7981e41ac5ba",
+			"responses": [],
+			"synced": false,
+			"rawModeData": "{\n  \"type\": \"pdf2swf\",\n  \"data\": {\n    \"title\": \"Content 123 - SWF\",\n    \"content_id\": 123,\n    \"input\": \"./contentunit/123/origin/default.pdf\",\n    \"output\": \"./contentunit/123/fp/%.swf\",\n    \"mkdirp\": true,\n    \"_delay\": 5000\n  },\n  \"options\": {\n    \"attempts\": 3,\n    \"priority\": \"normal\"\n  }\n}"
+		}
+	]
+}
