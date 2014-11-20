@@ -262,6 +262,18 @@ var initiliazer = function (app) {
                     return;
                 }
 
+                var lockData = {
+                    "hostname": app.cfg.name,
+                    "process_name": process.title,
+                    "process_id": process.pid,
+                    "process_exec_path": process.execPath,
+                    "process_argv": process.execArgv,
+                    "start_time": new Date(),
+                    "description": "Generate FP SWF files."
+                };
+
+                fs.outputJsonSync(fp_lock_path, lockData);
+
                 job.progress(2, 4);
 
 

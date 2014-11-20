@@ -70,6 +70,16 @@ var queue = kue.createQueue({
     redis: redis_options
 });
 
+// Graceful shutdown
+process.once('SIGINT', function (sig) {
+    console.log(sig);
+    queue.shutdown(function (err) {
+        logger.info('Kue is shutting down.', err || null);
+        process.exit(0);
+    }, 5000);
+});
+
+
 // Export application
 var app = {
     cfg: cfg,
@@ -128,5 +138,4 @@ if (cfg.cluster_mode) {
 
     queue.promote();
 }
-
 
