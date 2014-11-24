@@ -36,10 +36,6 @@ function isPathAvailable(basePath, checkingPath) {
     return checkingPath.indexOf(basePath) === 0;
 }
 
-function isGeneratingMultipleFiles(output_swf_path) {
-    return path.basename(output_swf_path).indexOf('%') >= 0;
-}
-
 function createRestClient() {
     var options = {
         /**
@@ -192,10 +188,10 @@ function buildEvents(settings) {
 
 var initiliazer = function (app) {
 
-    this.name = "pdf2swf";
-    this.description = "Convert PDF file to SWF file.";
+    this.name = "pdf_preview_gen";
+    this.description = "Generate preview pdf.";
 
-    this.settings = app.cfg.workers.pdf2swf;
+    this.settings = app.cfg.workers.pdf_preview_gen;
 
     this.worker_type = this.settings.worker_type;
     this.concurrency_number = this.settings.concurrency_number;
@@ -208,29 +204,18 @@ var initiliazer = function (app) {
         var processHandler = function(job, done, ctx){
             job.log("Processing at %s", new Date());
 
-            var settings = app.cfg.workers.pdf2swf;
+            var settings = app.cfg.workers.pdf_preview_gen;
 
             var data_path = path.resolve(settings.data_path);
 
             var input_pdf_path = path.join(data_path, job.data.input);
-            var output_swf_path = path.join(data_path, job.data.output);
-            var output_swf_dir = path.dirname(output_swf_path);
-
-            var isMultiGen = isGeneratingMultipleFiles(output_swf_path);
-
+            var output_pdf_path = path.join(data_path, job.data.output);
+            var output_pdf_dir = path.dirname(output_pdf_path);
+            var pageRange = job.data.pageRange;
 
             var script = isWin ? settings.win_script_path : settings.script_path;
-            var command_format = isWin ? "%s \"%s\" \"%s\"" : "sh %s %s %s";
-
-            var command = util.format(command_format, script, input_pdf_path, output_swf_path);
-
-            if (!fs.existsSync(input_pdf_path)) {
-                done(new Error('Input file does not exist.'));
-
-                // TODO: disable retry
-
-                return;
-            }
+            var command_format = isWin ? "%s \"%s\" \"%s\" \"%s\"" : "sh %s %s %s %s";
+            var command = util.format(command_format, script, input_pdf_path, pageRange, output_pdf_path);
 
             // security check. avoid access system files
             if (!isPathAvailable(data_path, input_pdf_path)) {
@@ -241,8 +226,17 @@ var initiliazer = function (app) {
                 return;
             }
 
-            if (!isPathAvailable(data_path, output_swf_path)) {
+            if (!isPathAvailable(data_path, output_pdf_path)) {
                 done(new Error('Output file path is invalid.'));
+
+                // TODO: disable retry
+
+                return;
+            }
+
+            // check whether input file exists
+            if (!fs.existsSync(input_pdf_path)) {
+                done(new Error('Input file does not exist.'));
 
                 // TODO: disable retry
 
@@ -253,22 +247,20 @@ var initiliazer = function (app) {
             // ready
             job.progress(1, 4);
 
-            var fp_lock_path = path.join(output_swf_dir, '../fp.lock');
-            var fp_complete_path = path.join(output_swf_dir, "../fp.complete");
-
+            var preview_lock_path = path.join(output_pdf_dir, '../preview.lock');
 
             // touch a lock file in parent directory of output_swf_path: "fp.lock"\
-            if (!isPathAvailable(data_path, fp_lock_path)) {
-                done(new Error('FP lock file path is invalid.'));
+            if (!isPathAvailable(data_path, preview_lock_path)) {
+                done(new Error('preview lock file path is invalid.'));
 
                 // TODO: disable retry
 
                 return;
             }
 
-            touchFile(fp_lock_path, true, function (err, fd) {
+            touchFile(preview_lock_path, true, function (err, fd) {
                 if (err) {
-                    done(new Error('FP lock file already exists. Deny to process current job.'));
+                    done(new Error('preview lock file already exists. Deny to process current job.'));
                     return;
                 }
                 fs.closeSync(fd);   //close file handler
@@ -280,22 +272,14 @@ var initiliazer = function (app) {
                     "process_exec_path": process.execPath,
                     "process_argv": process.execArgv,
                     "start_time": new Date(),
-                    "description": "Generate FP SWF files."
+                    "description": "Generate preview PDF file."
                 };
 
-                fs.outputJsonSync(fp_lock_path, lockData);
+                fs.outputJsonSync(preview_lock_path, lockData);
 
                 job.progress(2, 4);
 
-                // clear fp.complete and fp/ directory.
-                fs.removeSync(fp_complete_path);
-
-                if (isMultiGen) {
-                    // Re-create output directory if not exists
-                    fs.removeSync(output_swf_dir);
-                }
-
-                fs.mkdirsSync(output_swf_dir);
+                fs.mkdirsSync(output_pdf_dir);
 
                 job.progress(3, 4);
 
@@ -314,17 +298,12 @@ var initiliazer = function (app) {
                         done(error);
                     } else {
                         // Successfully done
-
-                        // mark an fs.complete file in parent directory of output_swf_path: "fp.complete"
-                        touchFileSync(fp_complete_path, false);
-
                         job.progress(4, 4);
                         done();
                     }
 
                     // remove fp.lock file anyway.
-                    fs.removeSync(fp_lock_path);
-
+                    fs.removeSync(preview_lock_path);
                 });
 
             });

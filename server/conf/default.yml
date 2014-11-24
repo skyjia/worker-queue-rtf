@@ -10,7 +10,7 @@ logger:
     enabled: true # always true
   run_log_file:
     enabled: true # always true
-    path: "log/run.log"
+    path: "d:\\log\\run.log"
     # Default maxsize = 10MB.
     # Max size in bytes of the logfile, if the size is exceeded then a new file is created.
     maxsize: 10485760
@@ -18,7 +18,7 @@ logger:
     maxFiles: 10
   exception_log_file:
     enabled: true # always true
-    path: "log/exceptions.log"
+    path: "d:\\log\\exceptions.log"
     # Default maxsize = 10MB.
     # Max size in bytes of the logfile, if the size is exceeded then a new file is created.
     maxsize: 10485760
@@ -66,6 +66,6 @@ workers:
     worker_type: pdf2swf
     concurrency_number: 1
     script_path: ./tools/pdf2swf.sh
-    win_script_path: ./tools/windows/pdf2swf.bat
+    win_script_path: ./tools/windows/pdf2swf-win.bat
     data_path: ./data
     callback: http://localhost:9001/job_queue/callback/generate_fp_files/

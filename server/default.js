@@ -39,20 +39,24 @@ var logger = new (winston.Logger)({
         new (winston.transports.Console)({
             colorize: true,
             timestamp: true
-        }),
+        })
 
         // File logger
-        new winston.transports.File({
-            filename: cfg.logger.run_log_file.path,
-            maxsize: cfg.logger.run_log_file.maxsize,
-            maxFiles: cfg.logger.run_log_file.maxFiles
-        })
+        //new winston.transports.File({
+        //    filename: cfg.logger.run_log_file.path,
+        //    maxsize: cfg.logger.run_log_file.maxsize,
+        //    maxFiles: cfg.logger.run_log_file.maxFiles
+        //})
     ],
     exceptionHandlers: [
-        new winston.transports.File({
-            filename: cfg.logger.exception_log_file.path,
-            maxsize: cfg.logger.exception_log_file.maxsize,
-            maxFiles: cfg.logger.exception_log_file.maxFiles
+        //new winston.transports.File({
+        //    filename: cfg.logger.exception_log_file.path,
+        //    maxsize: cfg.logger.exception_log_file.maxsize,
+        //    maxFiles: cfg.logger.exception_log_file.maxFiles
+        //})
+        new (winston.transports.Console)({
+            colorize: true,
+            timestamp: true
         })
     ]
 });

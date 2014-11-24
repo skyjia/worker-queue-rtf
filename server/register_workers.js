@@ -14,6 +14,7 @@ const JOB_PROMOTION_EVENT_HANDLER = 'job_promotion_handler';
 const JOB_FAILED_EVENT_HANDLER = 'job_failed_handler';
 const JOB_COMPLETE_EVENT_HANDLER = 'job_complete_handler';
 const JOB_FAILED_ATTEMPT_HANDLER = 'job_failed_attempt_handler';
+const JOB_PORGRESS_HANDLER = 'job_progress_handler';
 
 function registerJobEvents(eventsArr, currentQueue, logger) {
     // the job is now queued
@@ -23,6 +24,16 @@ function registerJobEvents(eventsArr, currentQueue, logger) {
         _.forEach(eventsArr, function(events){
             if(events[JOB_ENQUEUE_EVENT_HANDLER]){
                 events[JOB_ENQUEUE_EVENT_HANDLER].call(events, id, type);
+            }
+        });
+    });
+
+    currentQueue.on('job progress', function (id, progress) {
+        logger.info("Job [%d] progress.", id);
+
+        _.forEach(eventsArr, function(events){
+            if(events[JOB_PORGRESS_HANDLER]){
+                events[JOB_PORGRESS_HANDLER].call(events, id, progress);
             }
         });
     });
@@ -82,14 +93,24 @@ var registerWorkers = function (app, currentQueue) {
     // Register pdf2swf worker:
     var pdf2swf_worker = require('../workers/pdf2swf.js')(app);
     registerWorker(pdf2swf_worker, currentQueue);
+    logger.info("Worker %s is registered.", pdf2swf_worker.name);
+
     if (pdf2swf_worker.events) {
         jobEventsArr.push(pdf2swf_worker.events);
     }
-    logger.info("Worker %s is registered.", pdf2swf_worker.name);
 
+    // Register pdf_preview_gen worker:
+    var pdf_preview_gen_worker = require('../workers/pdf_preview_gen.js')(app);
+    registerWorker(pdf_preview_gen_worker, currentQueue);
+    logger.info("Worker %s is registered.", pdf_preview_gen_worker.name);
+
+    if (pdf_preview_gen_worker.events) {
+        jobEventsArr.push(pdf_preview_gen_worker.events);
+    }
+
+    // Register job events:
     registerJobEvents(jobEventsArr, currentQueue, logger);
     logger.info("Worker events are registered.");
-
 };
 
 module.exports = registerWorkers;

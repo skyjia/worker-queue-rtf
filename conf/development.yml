@@ -15,6 +15,21 @@ workers:
     worker_type: pdf2swf
     concurrency_number: 1
     script_path: ./tools/pdf2swf.sh
-    win_script_path: ./tools/windows/pdf2swf.bat
-    data_path: ./data
+    win_script_path: .\\tools\\windows\\pdf2swf-win.bat
+    data_path: d:\\files
     callback: http://localhost:9001/job_queue/callback/generate_fp_files/
+  pdf_preview_gen:
+    worker_type: pdf_preview_gen
+    concurrency_number: 1
+    script_path: ./tools/pdf_preview_gen.sh
+    win_script_path: .\\tools\\windows\\pdf_preview_gen.bat
+    data_path: d:\\files
+    callback: http://localhost:9001/job_queue/callback/generate_preview_file/
+  pdf_offline_gen:
+    worker_type: pdf_offline_gen
+    concurrency_number: 1
+    script_path: ./tools/pdf_offline_gen.sh
+    win_script_path: .\\tools\\windows\\pdf_offline_gen.bat
+    data_path: d:\\files
+    callback: http://localhost:9001/job_queue/callback/generate_offline_file/
+
