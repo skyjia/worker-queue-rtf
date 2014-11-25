@@ -3,7 +3,8 @@
 	"name": "WorkerQueue",
 	"description": "",
 	"order": [
-		"0adc423b-7862-dd99-8789-97b2fe3c2307"
+		"0adc423b-7862-dd99-8789-97b2fe3c2307",
+		"a3a63f51-a252-50b9-125b-47fd76fbc62d"
 	],
 	"folders": [],
 	"timestamp": 1416372603324,
@@ -27,6 +28,25 @@
 			"responses": [],
 			"synced": false,
 			"rawModeData": "{\n  \"type\": \"pdf2swf\",\n  \"data\": {\n    \"title\": \"Content 123 - SWF\",\n    \"content_id\": 123,\n    \"input\": \"./contentunit/123/origin/default.pdf\",\n    \"output\": \"./contentunit/123/fp/%.swf\",\n    \"mkdirp\": true,\n    \"_delay\": 5000\n  },\n  \"options\": {\n    \"attempts\": 3,\n    \"priority\": \"normal\"\n  }\n}"
+		},
+		{
+			"id": "a3a63f51-a252-50b9-125b-47fd76fbc62d",
+			"headers": "Content-Type: application/json\n",
+			"url": "localhost:3000/job",
+			"preRequestScript": "",
+			"pathVariables": {},
+			"method": "POST",
+			"data": [],
+			"dataMode": "raw",
+			"version": 2,
+			"tests": "",
+			"time": 1416890574297,
+			"name": "Job - pdf_preview_gen",
+			"description": "",
+			"collectionId": "b8fbceae-c581-d681-44f2-7981e41ac5ba",
+			"responses": [],
+			"synced": false,
+			"rawModeData": "{\n  \"type\": \"pdf_preview_gen\",\n  \"data\": {\n    \"title\": \"Content 123 - SWF\",\n    \"content_id\": 123,\n    \"input\": \"./contentunit/123/origin/default.pdf\",\n    \"output\": \"./contentunit/123/preview/1.pdf\",\n    \"pageRange\": \"2-3 11-12\",\n    \"mkdirp\": true,\n    \"_delay\": 5000\n  },\n  \"options\": {\n    \"attempts\": 3,\n    \"priority\": \"normal\"\n  }\n}"
 		}
 	]
 }

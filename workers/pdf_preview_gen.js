@@ -215,7 +215,7 @@ function PdfPreviewGenWorker(app) {
             var pageRange = job.data.pageRange;
 
             var script = isWin ? worker.settings.win_script_path : worker.settings.script_path;
-            var command_format = isWin ? "%s \"%s\" \"%s\" \"%s\"" : "sh %s %s %s %s";
+            var command_format = isWin ? '%s "%s" "%s" "%s"' : 'sh %s "%s" "%s" "%s"';
             var command = util.format(command_format, script, input_pdf_path, pageRange, output_pdf_path);
 
             // security check. avoid access system files

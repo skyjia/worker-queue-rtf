@@ -221,7 +221,7 @@ function Pdf2SwfWorker(app) {
 
 
             var script = isWin ? worker.settings.win_script_path : worker.settings.script_path;
-            var command_format = isWin ? "%s \"%s\" \"%s\"" : "sh %s %s %s";
+            var command_format = isWin ? '%s "%s" "%s"' : 'sh %s "%s" "%s"';
 
             var command = util.format(command_format, script, input_pdf_path, output_swf_path);
 
