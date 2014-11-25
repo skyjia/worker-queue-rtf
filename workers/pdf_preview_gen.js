@@ -26,9 +26,11 @@ function touchFile(filePath, errorOnExist, cb) {
 
 function touchFileSync(filePath, errorOnExist) {
     if (errorOnExist) {
-        fs.openSync(filePath, 'wx');
+        var fd = fs.openSync(filePath, 'wx');
+        fs.closeSync(fd);
     } else {
-        fs.openSync(filePath, 'w');
+        var fd = fs.openSync(filePath, 'w');
+        fs.closeSync(fd);
     }
 }
 
