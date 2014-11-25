@@ -89,7 +89,7 @@ function postJobCallback(url, ctxData) {
 function buildEvents(settings) {
 
     return {
-        "job_enqueue_handler" : function (id, type) {
+        "job_enqueue_handler": function (id, type) {
             if (type === settings.worker_type) {
 
                 kue.Job.get(id, function (err, job) {
@@ -110,7 +110,7 @@ function buildEvents(settings) {
             }
         },
 
-        "job_progress_handler": function(id, progress) {
+        "job_progress_handler": function (id, progress) {
             kue.Job.get(id, function (err, job) {
                 if (err) return;
 
@@ -192,27 +192,26 @@ function buildEvents(settings) {
     };
 }
 
-var initiliazer = function (app) {
-
+function Pdf2SwfWorker(app) {
+    this.app = app;
     this.name = "pdf2swf";
     this.description = "Convert PDF file to SWF file.";
-
     this.settings = app.cfg.workers.pdf2swf;
-
     this.worker_type = this.settings.worker_type;
     this.concurrency_number = this.settings.concurrency_number;
     this.events = buildEvents(this.settings);
 
-    var logger = app.logger;
+    var self = this;
 
     this.handler = function (job, done, ctx) {
 
-        var processHandler = function(job, done, ctx){
+        var worker = self;
+        var logger = worker.app.logger;
+
+        var processHandler = function (job, done, ctx) {
             job.log("Processing at %s", new Date());
 
-            var settings = app.cfg.workers.pdf2swf;
-
-            var data_path = path.resolve(settings.data_path);
+            var data_path = path.resolve(worker.settings.data_path);
 
             var input_pdf_path = path.join(data_path, job.data.input);
             var output_swf_path = path.join(data_path, job.data.output);
@@ -221,7 +220,7 @@ var initiliazer = function (app) {
             var isMultiGen = isGeneratingMultipleFiles(output_swf_path);
 
 
-            var script = isWin ? settings.win_script_path : settings.script_path;
+            var script = isWin ? worker.settings.win_script_path : worker.settings.script_path;
             var command_format = isWin ? "%s \"%s\" \"%s\"" : "sh %s %s %s";
 
             var command = util.format(command_format, script, input_pdf_path, output_swf_path);
@@ -276,7 +275,7 @@ var initiliazer = function (app) {
                 fs.closeSync(fd);   //close file handler
 
                 var lockData = {
-                    "hostname": app.cfg.name,
+                    "hostname": worker.app.cfg.name,
                     "process_name": process.title,
                     "process_id": process.pid,
                     "process_exec_path": process.execPath,
@@ -335,21 +334,25 @@ var initiliazer = function (app) {
         // TODO: fixed sooner or later
         // Due to Kue's bug (https://github.com/LearnBoost/kue/issues/443),
         // we hack it to implement delay attempt.
-        if(typeof job._attempts !== 'undefined'){
+        if (typeof job._attempts !== 'undefined') {
             // is not the first time attempt
             // _delay in ms
-            if(job.data._delay && job.data._delay > 0){
+            if (job.data._delay && job.data._delay > 0) {
                 setTimeout(function () {
-                    processHandler(job,done,ctx);
+                    processHandler(job, done, ctx);
                 }, job.data._delay);
             }
         } else {
-            processHandler(job,done,ctx);
+            processHandler(job, done, ctx);
         }
 
     };
 
-    return this;
+}
+
+
+var initiliazer = function (app) {
+    return new Pdf2SwfWorker(app);
 };
 
 module.exports = initiliazer;
