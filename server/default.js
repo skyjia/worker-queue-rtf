@@ -35,6 +35,10 @@ var isWin = /^win/.test(process.platform);
 var winston = require('winston');
 winston.cli();
 
+// TODO: support write log in MongoDB.
+// TODO: support write log in Kafka.
+// TODO: support enable/disable a transport according to settings.
+// FIXME: support file transport in Windows.
 var winstonOptions;
 if(isWin){
     winstonOptions = {
@@ -119,11 +123,10 @@ if (cfg.cluster_mode) {
     var workerSize = cfg.cluster_worker_size > maxClusterWorkerSize ? maxClusterWorkerSize : cfg.cluster_worker_size;
 
     if (cluster.isMaster) {
-        logger.info("Kue is connectint to", redis_options.host + ":" + redis_options.port);
-        logger.info("Queue prefix:", cfg.job_prefix);
-
         logger.info("Kue is working in cluster mode.");
         logger.info("Cluster size is ", workerSize);
+        logger.info("Kue is connecting to", redis_options.host + ":" + redis_options.port);
+        logger.info("Queue prefix:", cfg.job_prefix);
 
         for (var i = 0; i < workerSize; i++) {
             cluster.fork();
@@ -145,20 +148,18 @@ if (cfg.cluster_mode) {
 
 } else {
     // Working in single process mode.
-
-    logger.info("Kue is connectint to", redis_options.host + ":" + redis_options.port);
-    logger.info("Queue prefix:", cfg.job_prefix);
-
     logger.info("Kue is working in single process mode.");
-
-    // Start RESTful API listerning
-    kue.app.listen(port);
-    logger.info("Kue RESTful API is listening on port", port);
+    logger.info("Kue is connecting to", redis_options.host + ":" + redis_options.port);
+    logger.info("Queue prefix:", cfg.job_prefix);
 
     // Register workers
     var registerWorkers = require('./register_workers.js');
     registerWorkers(app, queue);
 
     queue.promote();
+
+    // Start RESTful API listerning
+    kue.app.listen(port);
+    logger.info("Kue RESTful API is listening on port", port);
 }
 

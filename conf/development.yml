@@ -10,26 +10,46 @@ job_prefix: "q"
 cluster_mode: false
 cluster_worker_size: 2
 
+logger:
+  console_logger:
+    enabled: true # always true
+  run_log_file:
+    enabled: true # always true
+    path: ./log/run.log
+    # Default maxsize = 10MB.
+    # Max size in bytes of the logfile, if the size is exceeded then a new file is created.
+    maxsize: 10485760
+    # Limit the number of files created when the size of the logfile is exceeded.
+    maxFiles: 10
+  exception_log_file:
+    enabled: true # always true
+    path: ./log/exceptions.log
+    # Default maxsize = 10MB.
+    # Max size in bytes of the logfile, if the size is exceeded then a new file is created.
+    maxsize: 10485760
+    # Limit the number of files created when the size of the logfile is exceeded.
+    maxFiles: 10
+
 workers:
   pdf2swf:
     worker_type: pdf2swf
     concurrency_number: 1
     script_path: ./tools/pdf2swf.sh
-    win_script_path: .\\tools\\windows\\pdf2swf-win.bat
-    data_path: d:\\files
+    win_script_path: ./tools/windows/pdf2swf-win.bat
+    data_path: ./data
     callback: http://localhost:9001/job_queue/callback/generate_fp_files/
   pdf_preview_gen:
     worker_type: pdf_preview_gen
     concurrency_number: 1
     script_path: ./tools/pdf_preview_gen.sh
-    win_script_path: .\\tools\\windows\\pdf_preview_gen.bat
-    data_path: d:\\files
+    win_script_path: ./tools/windows/pdf_preview_gen.bat
+    data_path: ./data
     callback: http://localhost:9001/job_queue/callback/generate_preview_file/
   pdf_offline_gen:
     worker_type: pdf_offline_gen
     concurrency_number: 1
     script_path: ./tools/pdf_offline_gen.sh
-    win_script_path: .\\tools\\windows\\pdf_offline_gen.bat
-    data_path: d:\\files
+    win_script_path: ./tools/windows/pdf_offline_gen.bat
+    data_path: ./data
     callback: http://localhost:9001/job_queue/callback/generate_offline_file/
 
