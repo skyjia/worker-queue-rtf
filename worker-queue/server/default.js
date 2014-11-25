@@ -123,6 +123,7 @@ if (cfg.cluster_mode) {
     var workerSize = cfg.cluster_worker_size > maxClusterWorkerSize ? maxClusterWorkerSize : cfg.cluster_worker_size;
 
     if (cluster.isMaster) {
+        logger.info("Node [%s] is working",cfg.name);
         logger.info("Kue is working in cluster mode.");
         logger.info("Cluster size is ", workerSize);
         logger.info("Kue is connecting to", redis_options.host + ":" + redis_options.port);
@@ -148,6 +149,7 @@ if (cfg.cluster_mode) {
 
 } else {
     // Working in single process mode.
+    logger.info("Node [%s] is working",cfg.name);
     logger.info("Kue is working in single process mode.");
     logger.info("Kue is connecting to", redis_options.host + ":" + redis_options.port);
     logger.info("Queue prefix:", cfg.job_prefix);

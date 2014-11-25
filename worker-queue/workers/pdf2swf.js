@@ -209,6 +209,7 @@ function Pdf2SwfWorker(app) {
         var logger = worker.app.logger;
 
         var processHandler = function (job, done, ctx) {
+            job.log("Processing starts at %s", new Date());
             logger.info("pdf2swf (job %s) - start processing", job.id);
 
             var data_path = path.resolve(worker.settings.data_path);
@@ -226,7 +227,7 @@ function Pdf2SwfWorker(app) {
             var command = util.format(command_format, script, input_pdf_path, output_swf_path);
 
             if (!fs.existsSync(input_pdf_path)) {
-                logger.info("pdf2swf (job %s) - input pdf not exist in %s", job.id, input_pdf_path);
+                logger.error("pdf2swf (job %s) - input pdf not exist in %s", job.id, input_pdf_path);
                 done(new Error('Input file does not exist.'));
 
                 // TODO: disable retry
@@ -236,7 +237,7 @@ function Pdf2SwfWorker(app) {
 
             // security check. avoid access system files
             if (!isPathAvailable(data_path, input_pdf_path)) {
-                logger.info("pdf2swf (job %s) - input pdf path is not valid, %s", job.id, input_pdf_path);
+                logger.error("pdf2swf (job %s) - input pdf path is not valid, %s", job.id, input_pdf_path);
                 done(new Error('Input file path is invalid.'));
 
                 // TODO: disable retry
@@ -245,7 +246,7 @@ function Pdf2SwfWorker(app) {
             }
 
             if (!isPathAvailable(data_path, output_swf_path)) {
-                logger.info("pdf2swf (job %s) - output swf path is not valid, %s", job.id, output_swf_path);
+                logger.error("pdf2swf (job %s) - output swf path is not valid, %s", job.id, output_swf_path);
                 done(new Error('Output file path is invalid.'));
 
                 // TODO: disable retry
@@ -263,7 +264,7 @@ function Pdf2SwfWorker(app) {
 
             // touch a lock file in parent directory of output_swf_path: "fp.lock"\
             if (!isPathAvailable(data_path, fp_lock_path)) {
-                logger.info("pdf2swf (job %s) - fp lock path is not valid, %s", job.id, fp_lock_path);
+                logger.error("pdf2swf (job %s) - fp lock path is not valid, %s", job.id, fp_lock_path);
                 done(new Error('FP lock file path is invalid.'));
 
                 // TODO: disable retry
@@ -273,7 +274,7 @@ function Pdf2SwfWorker(app) {
 
             touchFile(fp_lock_path, true, function (err, fd) {
                 if (err) {
-                    logger.info("pdf2swf (job %s) - FP lock file already exists. Deny to process current job, %s", job.id, fp_lock_path);
+                    logger.error("pdf2swf (job %s) - FP lock file already exists. Deny to process current job, %s", job.id, fp_lock_path);
                     done(new Error('FP lock file already exists. Deny to process current job.'));
                     return;
                 }
@@ -290,13 +291,13 @@ function Pdf2SwfWorker(app) {
                 };
 
                 fs.outputJsonSync(fp_lock_path, lockData);
-                logger.info("pdf2swf (job %s) - Success create fp lock file, %s", job.id, fp_lock_path);
+                logger.info("pdf2swf (job %s) - Created fp.lock file, %s", job.id, fp_lock_path);
 
                 job.progress(2, 4);
 
                 // clear fp.complete and fp/ directory.
                 fs.removeSync(fp_complete_path);
-                logger.info("pdf2swf (job %s) - Success remove fp complete file, %s", job.id, fp_complete_path);
+                logger.info("pdf2swf (job %s) - Removed fp.complete file, %s", job.id, fp_complete_path);
 
                 if (isMultiGen) {
                     // Re-create output directory if not exists
@@ -304,33 +305,32 @@ function Pdf2SwfWorker(app) {
                 }
 
                 fs.mkdirsSync(output_swf_dir);
-                logger.info("pdf2swf (job %s) - Success create output swf directory, %s", job.id, output_swf_dir);
+                logger.info("pdf2swf (job %s) - Created SWF output directory, %s", job.id, output_swf_dir);
 
                 job.progress(3, 4);
 
                 // Generate SWF file(s)
-                logger.info("EXEC: %s", command);
+                logger.info("pdf2swf (job %s) - Executing command: %s", job.id, command);
                 var child_process = exec(command, function (error, stdout, stderr) {
 
                     if (stderr.length > 0) {
-                        logger.info("pdf2swf (job %s) - Failed to execute pdf2swf command, error: %s", job.id, stderr);
-
+                        logger.error("pdf2swf (job %s) - Failed to execute pdf2swf command, error: %s", job.id, stderr);
                         logger.error(stderr);
                         job.log(stderr);
                     }
 
                     if (error !== null) {
-                        logger.info("pdf2swf (job %s) - Failed to execute pdf2swf command, error: %s", job.id, error.message);
+                        logger.error("pdf2swf (job %s) - Failed to execute pdf2swf command, error: %s", job.id, error.message);
 
                         // error occurs
                         done(error);
                     } else {
                         // Successfully done
-                        logger.info("pdf2swf (job %s) - Success execute pdf2swf command, stdout: %s", job.id, stdout);
+                        logger.info("pdf2swf (job %s) - Command result: %s", job.id, stdout);
 
                         // mark an fs.complete file in parent directory of output_swf_path: "fp.complete"
                         touchFileSync(fp_complete_path, false);
-                        logger.info("pdf2swf (job %s) - Success create fp.complete file", job.id);
+                        logger.info("pdf2swf (job %s) - Created fp.complete file", job.id);
 
                         job.progress(4, 4);
                         done();
@@ -338,7 +338,7 @@ function Pdf2SwfWorker(app) {
 
                     // remove fp.lock file anyway.
                     fs.removeSync(fp_lock_path);
-                    logger.info("pdf2swf (job %s) - Success remove fp.lock file", job.id);
+                    logger.info("pdf2swf (job %s) - Removed fp.lock file", job.id);
 
                 });
 
