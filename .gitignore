@@ -1,10 +1,14 @@
+# 排除Node项目下的Node module, iisnode, debug文件
+/*/node_modules/
+/*/iisnode/
+/*/*.js.debug/
+
 # Ignore WebStorm generated files
 .idea/
-log/
 
-data/
+# Ignore dist folder
+dist/*.yml
+dist/*.nar
 
+# Ignore redis dump file
 dump.rdb
-
-node_modules/
-npm-debug.log

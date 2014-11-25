@@ -1,0 +1,10 @@
+# Ignore WebStorm generated files
+.idea/
+log/
+
+data/
+
+dump.rdb
+
+node_modules/
+npm-debug.log
