@@ -78,7 +78,7 @@ function postJobCallback(url, ctxData) {
     };
 
     client.post(url, args, function (data, response) {
-        console.log(response.statusCode);
+        console.log(response.statusCode, ' ', url);
     }).on('error', function (err) {
         console.log('REST request error', err.request.options);
     });
