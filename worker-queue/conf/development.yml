@@ -53,8 +53,5 @@ workers:
   pdf_offline_gen:
     worker_type: pdf_offline_gen
     concurrency_number: 1
-    script_path: ./tools/pdf_offline_gen.sh
-    win_script_path: ./tools/windows/pdf_offline_gen.bat
-    data_path: ./data
-    callback: http://localhost:9001/job_queue/callback/generate_offline_file/
+    data_path: d:\\files
 

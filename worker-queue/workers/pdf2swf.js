@@ -65,6 +65,8 @@ function createRestClient() {
 
 function postJobCallback(url, ctxData) {
 
+    if (!url) return;
+
     var client = createRestClient();
 
     // set content-type header and data as json in args parameter
@@ -309,20 +311,16 @@ function Pdf2SwfWorker(app) {
                 job.progress(3, 4);
 
                 // Generate SWF file(s)
-                logger.info("EXEC: %s", command);
+                logger.info("pdf2swf (job %s) - EXEC: %s", job.id, command);
                 var child_process = exec(command, function (error, stdout, stderr) {
 
                     if (stderr.length > 0) {
-                        logger.info("pdf2swf (job %s) - Failed to execute pdf2swf command, error: %s", job.id, stderr);
-
-                        logger.error(stderr);
+                        logger.error("pdf2swf (job %s) - Failed to execute pdf2swf command, error: %s", job.id, stderr);
                         job.log(stderr);
                     }
 
                     if (error !== null) {
-                        logger.info("pdf2swf (job %s) - Failed to execute pdf2swf command, error: %s", job.id, error.message);
-
-                        // error occurs
+                        logger.error("pdf2swf (job %s) - Failed to execute pdf2swf command, error: %s", job.id, error.message);
                         done(error);
                     } else {
                         // Successfully done

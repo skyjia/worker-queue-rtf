@@ -108,6 +108,15 @@ var registerWorkers = function (app, currentQueue) {
         jobEventsArr.push(pdf_preview_gen_worker.events);
     }
 
+    // Register pdf_offline_gen worker:
+    var pdf_offline_gen_worker = require('../workers/pdf_offline_gen.js')(app);
+    registerWorker(pdf_offline_gen_worker, currentQueue);
+    logger.info("Worker %s is registered.", pdf_offline_gen_worker.name);
+
+    if (pdf_offline_gen_worker.events) {
+        jobEventsArr.push(pdf_offline_gen_worker.events);
+    }
+
     // Register job events:
     registerJobEvents(jobEventsArr, currentQueue, logger);
     logger.info("Worker events are registered.");

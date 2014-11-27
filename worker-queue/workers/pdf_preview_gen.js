@@ -61,6 +61,8 @@ function createRestClient() {
 
 function postJobCallback(url, ctxData) {
 
+    if (!url) return;
+
     var client = createRestClient();
 
     // set content-type header and data as json in args parameter
