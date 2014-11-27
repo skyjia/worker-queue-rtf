@@ -29,7 +29,7 @@ function registerJobEvents(eventsArr, currentQueue, logger) {
     });
 
     currentQueue.on('job progress', function (id, progress) {
-        logger.info("Job [%d] progress.", id);
+        logger.info("Job [%d] progress %d%.", id, progress);
 
         _.forEach(eventsArr, function(events){
             if(events[JOB_PORGRESS_HANDLER]){

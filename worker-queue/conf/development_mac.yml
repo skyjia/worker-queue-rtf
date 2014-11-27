@@ -1,7 +1,7 @@
 # Configurations for development environment.
 # Refer to default.yml for more information.
 
-name: "worker_queue"
+name: "worker_queue_mac"
 debug_mode: true
 
 job_prefix: "q"
