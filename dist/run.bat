@@ -19,6 +19,8 @@ set WORKER_QUEUE_FOLDER=%EXTRACT_FOLDER%\worker_queue
 echo WORKER_QUEUE_FOLDER=%WORKER_QUEUE_FOLDER%
 echo.
 
+IF "%1" == "" goto usage
+
 :: email-service
 IF "%1" == "worker-queue" (
 
@@ -32,15 +34,16 @@ IF "%1" == "worker-queue" (
 	goto end
 )
 
+:usage
 :: usage help
-echo Usage run.bat <command> 
+echo Usage run.bat ^<command^>
 echo.
 echo where command is one of:
 echo worker-queue
 echo.
 echo Examples:
-echo   ./run.bat worker-queue
-echo   set PORT=3003 && ./run.bat worker-queue
+echo   .\run.bat worker-queue
+echo   set PORT=3003 ^&^& .\run.bat worker-queue
 
 :end
 :: restore to old directory

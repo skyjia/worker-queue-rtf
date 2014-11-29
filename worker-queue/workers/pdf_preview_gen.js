@@ -207,7 +207,7 @@ function PdfPreviewGenWorker(app) {
         var logger = worker.app.logger;
 
         var processHandler = function (job, done, ctx) {
-            job.log("Processing at %s", new Date());
+            logger.info("pdf_preview_gen (job %s) - start processing", job.id);
 
             var data_path = path.resolve(worker.settings.data_path);
 
@@ -222,6 +222,7 @@ function PdfPreviewGenWorker(app) {
 
             // security check. avoid access system files
             if (!isPathAvailable(data_path, input_pdf_path)) {
+                logger.info("pdf_preview_gen (job %s) - input path is not valid, %s", job.id, input_pdf_path);
                 done(new Error('Input file path is invalid.'));
 
                 // TODO: disable retry
@@ -230,6 +231,7 @@ function PdfPreviewGenWorker(app) {
             }
 
             if (!isPathAvailable(data_path, output_pdf_path)) {
+                logger.info("pdf_preview_gen (job %s) - output path is not valid, %s", job.id, input_pdf_path);
                 done(new Error('Output file path is invalid.'));
 
                 // TODO: disable retry
@@ -239,13 +241,13 @@ function PdfPreviewGenWorker(app) {
 
             // check whether input file exists
             if (!fs.existsSync(input_pdf_path)) {
+                logger.info("pdf_preview_gen (job %s) - input path is not valid, %s", job.id, input_pdf_path);
                 done(new Error('Input file does not exist.'));
 
                 // TODO: disable retry
 
                 return;
             }
-
 
             // ready
             job.progress(1, 4);
@@ -254,6 +256,7 @@ function PdfPreviewGenWorker(app) {
 
             // touch a lock file in parent directory of output_swf_path: "fp.lock"\
             if (!isPathAvailable(data_path, preview_lock_path)) {
+                logger.info("pdf_preview_gen (job %s) - preview lock file path is invalid, %s", job.id, preview_lock_path);
                 done(new Error('preview lock file path is invalid.'));
 
                 // TODO: disable retry
@@ -263,6 +266,7 @@ function PdfPreviewGenWorker(app) {
 
             touchFile(preview_lock_path, true, function (err, fd) {
                 if (err) {
+                    logger.info("pdf_preview_gen (job %s) - preview lock file already exists. Deny to process current job. %s", job.id, preview_lock_path);
                     done(new Error('preview lock file already exists. Deny to process current job.'));
                     return;
                 }
@@ -279,34 +283,38 @@ function PdfPreviewGenWorker(app) {
                 };
 
                 fs.outputJsonSync(preview_lock_path, lockData);
+                logger.info("pdf_preview_gen (job %s) - finish creating lock file, %s", job.id, preview_lock_path);
 
                 job.progress(2, 4);
 
                 fs.mkdirsSync(output_pdf_dir);
+                logger.info("pdf_preview_gen (job %s) - finish creating output file dir, %s", job.id, output_pdf_dir);
 
                 job.progress(3, 4);
 
                 // Generate SWF file(s)
-                logger.info("EXEC: %s", command);
+                logger.info("pdf_preview_gen (job %s) - EXEC: %s", job.id, command);
                 var child_process = exec(command, function (error, stdout, stderr) {
                     logger.info(stdout);
 
                     if (stderr.length > 0) {
+                        logger.info("pdf_preview_gen (job %s) - Failed to execute command, error: %s", job.id, stderr);
                         logger.error(stderr);
                         job.log(stderr);
                     }
 
                     if (error !== null) {
-                        // error occurs
+                        logger.info("pdf_preview_gen (job %s) - Failed to execute command, error: %s", job.id, error.message);
                         done(error);
                     } else {
-                        // Successfully done
+                        logger.info("pdf_preview_gen (job %s) - Success execute command, stdout: %s", job.id, stdout);
                         job.progress(4, 4);
                         done();
                     }
 
                     // remove fp.lock file anyway.
                     fs.removeSync(preview_lock_path);
+                    logger.info("pdf_preview_gen (job %s) - Remove lock file, %s", job.id, preview_lock_path);
                 });
 
             });
